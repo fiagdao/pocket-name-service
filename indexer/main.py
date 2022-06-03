@@ -50,7 +50,7 @@ def main():
                         quit()
 
                     # deactivate expired domains
-                    expired_domains = Domain.select().where(Domain.ending_date >= block)
+                    expired_domains = Domain.select().where(Domain.ending_date <= block)
 
                     for domain in expired_domains:
                         domain.active = False

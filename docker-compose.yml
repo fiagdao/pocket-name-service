@@ -1,0 +1,32 @@
+version: '3.7'
+
+services:
+  postgres:
+    container_name: postgres
+    image: postgres
+    ports:
+      - "5432:5432"
+    env_file:
+      - .env
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+      - ./postgres:/docker-entrypoint-initdb.d
+  indexer:
+    container_name: indexer
+    build: ./indexer
+    env_file:
+      - .env
+    depends_on:
+      - postgrest
+      - postgres
+  postgrest:
+    container_name: postgrest
+    image: postgrest/postgrest
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - postgres
+volumes:
+  static:
