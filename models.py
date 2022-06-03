@@ -3,21 +3,25 @@ from peewee import *
 # will change to postgres in prod
 db = SqliteDatabase('db')
 
+
 class Domain(Model):
-    owner = CharField(max_length=40)
+    owner = CharField(max_length=40, null=True)
     resolves_to = CharField(max_length=40)
     name = CharField(max_length=26)
-    last_renewal = IntegerField(null=True) # null=True means that it is optional
+    # null=True means that it is optional
+    last_renewal = IntegerField(null=True)
     ending_date = IntegerField(null=True)
     active = BooleanField()
     parent = ForeignKeyField('self', null=True)
 
     class Meta:
-        database=db
+        database = db
         db_table = "domain"
 
+
 class Event(Model):
-    txhash = CharField(max_length=64)
+    function = CharField(max_length=64)
+    txhash = CharField(max_length=64, null=True)
     domain = ForeignKeyField(Domain)
     old_owner = CharField(max_length=40)
     new_owner = CharField(max_length=40)
@@ -37,7 +41,8 @@ class State(Model):
         database = db
         db_table = "state"
 
+
 db.create_tables([Domain, Event, State])
 
 if State.select().count() == 0:
-	State.create(height=61114)
+    State.create(height=61208)
