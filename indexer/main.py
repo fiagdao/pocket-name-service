@@ -12,7 +12,11 @@ import logging
 
 from functions import *
 
-logging.basicConfig(filename='test.log', format='%(filename)s: %(message)s',
+logging.basicConfig(format='%(filename)s: %(message)s',
+                    handlers=[
+                        logging.FileHandler("test.log"),
+                        logging.StreamHandler()
+                    ],
                     level=logging.DEBUG)
 
 # setup and constants
