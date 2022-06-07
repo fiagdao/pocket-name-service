@@ -21,12 +21,11 @@ def register(tx: Transaction, domain_name: str, years: int):
     if int(tx.stdTx.msg.value.amount) != int(fees["register"]) * int(years) * int(10**pokt_decimals):
         print("Invalid Fee", tx.stdTx.msg.value.amount, int(
             fees["register"]) * int(years) * int(10**pokt_decimals))
-        return False
+        return False, 1
 
     # verify valid domain
     if verify_domain(domain_name) == False:
-        print("Invalid Domain")
-        return False
+        return False, 2
 
     # check if domain already exists
 
@@ -35,7 +34,7 @@ def register(tx: Transaction, domain_name: str, years: int):
     for i in domains:
         if i.name.lower() == domain_name.lower():
             if i.active == True:
-                return False
+                return False, 3
             else:
                 i.owner = tx.tx_result.signer
                 i.resolves_to = tx.tx_result.signer
@@ -82,7 +81,6 @@ def register(tx: Transaction, domain_name: str, years: int):
 
     return True
 
-
 def register_subdomain(tx: Transaction, subdomain: str, domain_id: str):
     """ Add domain to database with a parent domain
 
@@ -92,32 +90,30 @@ def register_subdomain(tx: Transaction, subdomain: str, domain_id: str):
     """
     # verify fee is correct
     if int(tx.stdTx.msg.value.amount) != int(fees["register"]) * int(10**pokt_decimals):
-        print("Invalid Fee")
-        return False
+        return False, 1
 
     # verify valid domain
     if verify_domain(subdomain) == False:
-        print("Invalid Domain")
-        return False
+        return False, 2
 
     # check if root domain exists
     try:
         root_domain = Domain[int(domain_id, 16)]
         if root_domain.active == False:
-            return False
+            return False, 4
     except (DoesNotExist):
-        return False
+        return False, 4
 
     # verify correct owner
-    if tx.tx_result.signer.upper() != root_domain.owner.upper():
-        return False
+    if tx.tx_result.signer.lower() != root_domain.owner.lower():
+        return False, 5
 
     domains = Domain.select()
 
     for i in domains:
         if i.name.lower() == subdomain.lower() and i.parent == root_domain:
             if i.active == True:
-                return False
+                return False, 3
             else:
                 i.resolves_to = tx.tx_result.signer
                 i.name = domain_name
@@ -168,27 +164,27 @@ def transfer_owner(tx: Transaction, domain_id: str, new_owner: str):
     """
 
     if tx.stdTx.msg.value.amount != fees["transfer"] * (10**pokt_decimals):
-        return False
+        return False, 1
 
     # check if root domain exists
     try:
         domain = Domain[int(domain_id, 16)]
         if domain.active == False:
-            return False
+            return False, 4
     except (DoesNotExist):
-        return False
+        return False, 4
 
     # check if it is a subdomain
     if domain.parent != None:
-        return False
+        return False, 6
 
     # verify owner
     if tx.tx_result.signer != domain.owner:
-        return False
+        return False, 5
 
     # valid address
     if not verify_address(new_owner):
-        return False
+        return False, 7
 
     old_owner = domain.owner
     domain.owner = new_owner
@@ -205,6 +201,8 @@ def transfer_owner(tx: Transaction, domain_id: str, new_owner: str):
         "height": tx.height
     })
 
+    return True
+
 
 def transfer_resolver(tx: Transaction, domain_id: str, new_resolver: str):
     """ Change the resolves_to of a domain to the new_resolver
@@ -214,28 +212,28 @@ def transfer_resolver(tx: Transaction, domain_id: str, new_resolver: str):
     new_resolver - the POKT address of the new resolver of the Domain
     """
     if tx.stdTx.msg.value.amount != fees["transfer"] * (10**pokt_decimals):
-        return False
+        return False, 1
 
     # check if root domain exists
     try:
         domain = Domain[int(domain_id, 16)]
     except (DoesNotExist):
-        return False
+        return False, 4
 
     if domain.parent != None:
         # verify parent owner *if subdomain
         owner = domain.parent.owner
         if tx.tx_result.signer != owner:
-            return False
+            return False, 5
     else:
         # verify domain owner
         owner = domain.owner
         if tx.tx_result.signer != owner:
-            return False
+            return False, 5
 
     # valid address
     if not verify_address(new_resolver):
-        return False
+        return False, 7
 
     old_resolver = domain.resolves_to
     domain.resolves_to = new_resolver
@@ -252,35 +250,37 @@ def transfer_resolver(tx: Transaction, domain_id: str, new_resolver: str):
         "height": tx.height
     })
 
+    return True
+
 
 def burn(tx: Transaction, domain_id: str):
-    """ Remove all attributes and deactive a Domain
+    """ Remove all attributes and deactivate a Domain
 
     tx - the POKT transaction where the burn occured
     domain_id - the incrementing ID of the domain in hex form.
     """
     # prevent people from spamming high id and overflowing system
     if int(domain_id, 16) > 10000000:
-        return False
+        return False, 8
     # check if root domain exists
     try:
         domain = Domain[int(domain_id, 16)]
     except (DoesNotExist):
-        return False
+        return False, 4
 
     if domain.active == False:
-        return False
+        return False, 4
 
     if domain.parent != None:
         # verify parent owner *if subdomain
         owner = domain.parent.owner
         if tx.tx_result.signer != owner:
-            return False
+            return False, 5
     else:
         # verify domain owner
         owner = domain.owner
         if tx.tx_result.signer != owner:
-            return False
+            return False, 5
 
     domain.active = False
     domain.save()
@@ -295,3 +295,5 @@ def burn(tx: Transaction, domain_id: str):
         "new_resolver": "0x0",
         "height": tx.height
     })
+
+    return True

@@ -106,35 +106,38 @@ def main():
                         if memo[:1] == "r":
                             params = memo[1:].split(",")
                             print("registering domain", params[0])
-                            if register(tx=tx, domain_name=params[0], years=params[1]) == False:
+                            register_ = register(tx=tx, domain_name=params[0], years=params[1])
+                            if register != True:
                                 # TODO: send back tokens to user if it fails
                                 print("Invalid domain register")
 
                         elif memo[:1] == "s":
                             params = memo[1:].split(",")
                             print("registering subdomain", params[0])
-                            if register_subdomain(tx=tx, subdomain=params[0], domain_id=params[1]) == False:
+                            register_subdomain_ = register_subdomain(tx=tx, subdomain=params[0], domain_id=params[1])
+                            if register_subdomain != True:
                                 # TODO: send back tokens to user if it fails
                                 print("Invalid subdomain register")
 
                         elif memo[:1] == "o":
                             params = memo[1:].split(",")
                             print("transfering ownership of ", params[0])
-
-                            if transfer_owner(tx=tx, domain_id=params[0], new_owner=params[1]) == False:
+                            transfer_owner_ = transfer_owner(tx=tx, domain_id=params[0], new_owner=params[1])
+                            if transfer_owner != True:
                                 print("Invalid owner transfership")
 
                         elif memo[:1] == "v":
                             params = memo[1:].split(",")
                             print("transfering resolver of ", params[0])
-
-                            if transfer_resolver(tx=tx, domain_id=params[0], new_resolver=params[1]) == False:
+                            transfer_resolver_ = transfer_resolver(tx=tx, domain_id=params[0], new_resolver=params[1])
+                            if transfer_resolver != True:
                                 print("Invalid resolver transfership")
 
                         elif memo[:1] == "b":
                             params = memo[1:].split(",")
                             print("burning ", params[0])
-                            if burn(tx=tx, domain_id=params[0]) == False:
+                            burn_ = burn(tx=tx, domain_id=params[0])
+                            if burn != True:
                                 print("Invalid burn")
 
                     state = State[1]
