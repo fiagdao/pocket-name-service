@@ -1,15 +1,11 @@
 from .config import Config
+from .logger import logger
 from argparse import ArgumentParser
+from multiprocessing import Process
 import json
 import os
-from threading import Thread
-from multiprocessing import Process
 import time
 import sys
-import signal
-import asyncio
-import threading
-from .logger import logger
 
 #
 # quit_event = threading.Event()
@@ -24,7 +20,11 @@ def main():
 
     args = parser.parse_args()
 
-    file = open(os.path.join(args.data_dir, "data/config/config.json")).read()
+    try:
+        file = open(os.path.join(args.data_dir, "data/config/config.json")).read()
+    except:
+        logger.error("Config file not found at {}".format(os.path.join(args.data_dir, "data/config/config.json")))
+        quit()
     dict = json.loads(file)
 
     config = Config(**dict)

@@ -1,15 +1,14 @@
-import json
-import fastapi_jsonrpc as jsonrpc
+from ..indexer.models import *
 from fastapi import Body
 from pydantic import BaseModel
+from playhouse.shortcuts import model_to_dict, dict_to_model
+import json
+import fastapi_jsonrpc as jsonrpc
 import threading
 import contextlib
 import uvicorn
 import time
-import signal
-from ..indexer.models import *
 import json
-from playhouse.shortcuts import model_to_dict, dict_to_model
 
 # import peewee
 
@@ -42,12 +41,49 @@ def syncing() -> str:
 
 
 @api_v1.method(errors=[])
-def all_domains(page: int = 1, per_page: int = 100) -> str:
+def domains(page: int = 1, per_page: int = 100) -> str:
     domains = (
         Domain.select()
         .order_by(Domain.id)
         .limit(per_page)
         .offset((page - 1) * per_page)
+    )
+
+    dict_domains = [model_to_dict(domain) for domain in domains]
+
+    return json.dumps(dict_domains)
+
+@api_v1.method(errors=[])
+def events(page: int = 1, per_page: int = 100) -> str:
+    events = (
+        Event.select()
+        .order_by(Event.id)
+        .limit(per_page)
+        .offset((page - 1) * per_page)
+    )
+
+    dict_events = [model_to_dict(event) for event in events]
+
+    return json.dumps(dict_events)
+
+@api_v1.method(errors=[])
+def owner_domains(owner: str) -> str:
+    domains = (
+        Domain.select()
+        .where(Domain.owner==owner)
+        .order_by(Domain.id)
+    )
+
+    dict_domains = [model_to_dict(domain) for domain in domains]
+
+    return json.dumps(dict_domains)
+
+@api_v1.method(errors=[])
+def domain_resolution(resolves_to: str) -> str:
+    domains = (
+        Domain.select()
+        .where(Domain.resolves_to==resolves_to)
+        .order_by(Domain.id)
     )
 
     dict_domains = [model_to_dict(domain) for domain in domains]

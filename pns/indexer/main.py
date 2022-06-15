@@ -1,18 +1,15 @@
 # to install pypocket follow instructions here: https://github.com/pokt-foundation/pypocket (it will be on PyPi soon)
+from .models import *
+from ..logger import logger
+from ..config import Config
+from .utils import *
+from .functions import *
 import sys
 from pokt import PoktRPCDataProvider
 from pokt.rpc.models import Transaction
-from argparse import ArgumentParser
-import threading
-from .models import *
 import json
 import os
-from ..logger import logger
 
-from .models import *
-from ..config import Config
-from .utils import get_block_txs, verify_domain, verify_address
-from .functions import *
 
 
 pokt_decimals = 6
