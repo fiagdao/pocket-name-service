@@ -15,27 +15,23 @@ from .logger import logger
 # quit_event = threading.Event()
 # signal.signal(signal.SIGINT, lambda *_args: quit_event.set())
 
+
 def main():
     data_default = "~/.pns"
-    parser = ArgumentParser(
-        "pns", description="Start pocket-name-service"
-    )
+    parser = ArgumentParser("pns", description="Start pocket-name-service")
 
-    parser.add_argument(
-        "-d",
-        "--data-dir",
-        type=str,
-        default=data_default
-    )
+    parser.add_argument("-d", "--data-dir", type=str, default=data_default)
 
     args = parser.parse_args()
 
-    file = open(os.path.join(args.data_dir,"data/config/config.json")).read()
+    file = open(os.path.join(args.data_dir, "data/config/config.json")).read()
     dict = json.loads(file)
 
     config = Config(**dict)
 
-    logger.info("Starting PNS in directory {}".format(os.path.join(args.data_dir, "data")))
+    logger.info(
+        "Starting PNS in directory {}".format(os.path.join(args.data_dir, "data"))
+    )
     # logger.info("Log file initialized at {}".format(os.path.join(args,data)))
     # why not?
     with open("pns/pns.txt") as myfile:

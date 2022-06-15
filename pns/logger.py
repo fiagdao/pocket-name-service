@@ -1,5 +1,6 @@
 import logging
 
+
 class CustomFormatter(logging.Formatter):
 
     green = "\x1b[32m"
@@ -15,13 +16,14 @@ class CustomFormatter(logging.Formatter):
         logging.INFO: green + format + reset,
         logging.WARNING: yellow + format + reset,
         logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset
+        logging.CRITICAL: bold_red + format + reset,
     }
 
     def format(self, record):
         log_fmt = self.FORMATS.get(record.levelno)
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
+
 
 # create logger with 'spam_application'
 logger = logging.getLogger("Indexer")

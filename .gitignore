@@ -1,3 +1,5 @@
 pns.egg-info
 data
 pypocket
+pns/__pycache__
+pns/rpc/__pycache__

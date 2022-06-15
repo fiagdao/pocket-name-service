@@ -1,8 +1,10 @@
 from pydantic import BaseModel
 
+
 class Fees(BaseModel):
     register_fee: int
     transfer_fee: int
+
 
 class Pns_config(BaseModel):
     rpc_url: str
@@ -10,8 +12,10 @@ class Pns_config(BaseModel):
     start_block: int
     fees: Fees
 
+
 class Rpc_config(BaseModel):
     listen_url: str
+
 
 class Config(BaseModel):
     pns_config: Pns_config

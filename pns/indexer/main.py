@@ -17,6 +17,7 @@ from .functions import *
 
 pokt_decimals = 6
 
+
 def start_pns(config: Config):
     """
     Continously loops through new blocks and checks if there are any valid transactions and will call their associated functions
@@ -52,30 +53,34 @@ def start_pns(config: Config):
                         domain.active = False
                         domain.save()
 
-                        Event.create(**{
-                            "function": "domain_expired",
-                            "domain": domain,
-                            "old_owner": domain.owner,
-                            "new_owner": "0x0",  # new_owner
-                            "old_resolver": domain.resolves_to,
-                            "new_resolver": "0x0",
-                            "height": block
-                        })
+                        Event.create(
+                            **{
+                                "function": "domain_expired",
+                                "domain": domain,
+                                "old_owner": domain.owner,
+                                "new_owner": "0x0",  # new_owner
+                                "old_resolver": domain.resolves_to,
+                                "new_resolver": "0x0",
+                                "height": block,
+                            }
+                        )
 
                         children = Domain.select().where(Domain.parent == domain)
                         for subdomain in children:
                             subdomain.active = False
                             subdomain.save()
 
-                            Event.create(**{
-                                "function": "domain_expired",
-                                "domain": subdomain,
-                                "old_owner": subdomain.parent.owner,
-                                "new_owner": "0x0",  # new_owner
-                                "old_resolver": subdomain.resolves_to,
-                                "new_resolver": "0x0",
-                                "height": block
-                            })
+                            Event.create(
+                                **{
+                                    "function": "domain_expired",
+                                    "domain": subdomain,
+                                    "old_owner": subdomain.parent.owner,
+                                    "new_owner": "0x0",  # new_owner
+                                    "old_resolver": subdomain.resolves_to,
+                                    "new_resolver": "0x0",
+                                    "height": block,
+                                }
+                            )
 
                     txs = get_block_txs(height=block, pokt_rpc=pokt_rpc)
 
@@ -98,7 +103,9 @@ def start_pns(config: Config):
                         if memo[:1] == "r":
                             params = memo[1:].split(",")
                             logger.info("registering domain {}".format(params[0]))
-                            register_ = register(tx=tx, domain_name=params[0], years=params[1])
+                            register_ = register(
+                                tx=tx, domain_name=params[0], years=params[1]
+                            )
                             if register != True:
                                 # TODO: send back tokens to user if it fails
                                 logger.info("Invalid domain register")
@@ -106,22 +113,30 @@ def start_pns(config: Config):
                         elif memo[:1] == "s":
                             params = memo[1:].split(",")
                             logger.info("registering subdomain {}".format(params[0]))
-                            register_subdomain_ = register_subdomain(tx=tx, subdomain=params[0], domain_id=params[1])
+                            register_subdomain_ = register_subdomain(
+                                tx=tx, subdomain=params[0], domain_id=params[1]
+                            )
                             if register_subdomain != True:
                                 # TODO: send back tokens to user if it fails
                                 logger.info("Invalid subdomain register")
 
                         elif memo[:1] == "o":
                             params = memo[1:].split(",")
-                            logger.info("transfering ownership of  {}".format(params[0]))
-                            transfer_owner_ = transfer_owner(tx=tx, domain_id=params[0], new_owner=params[1])
+                            logger.info(
+                                "transfering ownership of  {}".format(params[0])
+                            )
+                            transfer_owner_ = transfer_owner(
+                                tx=tx, domain_id=params[0], new_owner=params[1]
+                            )
                             if transfer_owner != True:
                                 logger.info("Invalid owner transfership")
 
                         elif memo[:1] == "v":
                             params = memo[1:].split(",")
                             logger.info("transfering resolver of  {}".format(params[0]))
-                            transfer_resolver_ = transfer_resolver(tx=tx, domain_id=params[0], new_resolver=params[1])
+                            transfer_resolver_ = transfer_resolver(
+                                tx=tx, domain_id=params[0], new_resolver=params[1]
+                            )
                             if transfer_resolver != True:
                                 logger.info("Invalid resolver transfership")
 
@@ -140,7 +155,7 @@ def start_pns(config: Config):
                     quit()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
 
 

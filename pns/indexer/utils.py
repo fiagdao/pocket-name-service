@@ -2,8 +2,11 @@ from pokt import PoktRPCDataProvider
 from pokt.rpc.utils import PoktRPCError, PortalRPCError
 import re
 
-def get_block_txs(height: int, pokt_rpc: PoktRPCDataProvider, retries: int = 20, per_page: int = 1000):
-    """ Gets all the transactions in order of a block
+
+def get_block_txs(
+    height: int, pokt_rpc: PoktRPCDataProvider, retries: int = 20, per_page: int = 1000
+):
+    """Gets all the transactions in order of a block
 
     height - the block to query transactions for
     pokt_rpc - the PoktRPCDataProvider object to use for the queries
@@ -16,8 +19,9 @@ def get_block_txs(height: int, pokt_rpc: PoktRPCDataProvider, retries: int = 20,
     while retries > 0:
         try:
             block_txs = pokt_rpc.get_block_transactions(
-                page=page, per_page=per_page, height=height)
-            if (block_txs.txs == []):
+                page=page, per_page=per_page, height=height
+            )
+            if block_txs.txs == []:
                 return txs
             else:
                 txs.extend(block_txs.txs)
@@ -33,25 +37,24 @@ def get_block_txs(height: int, pokt_rpc: PoktRPCDataProvider, retries: int = 20,
                     )
                 )
 
-    raise (
-        "get_block_txs failed"
-    )
+    raise ("get_block_txs failed")
     quit()
 
+
 def verify_domain(domain: str):
-    """ verifies that a string is ASCII and does not contain any '.'
+    """verifies that a string is ASCII and does not contain any '.'
 
     domain - the string to check
     """
-
 
     if "." in domain:
         return False
 
     return all(ord(c) < 128 for c in domain)
 
+
 def verify_address(address: str):
-    """ verifies that an string is a-f and 1-9
+    """verifies that an string is a-f and 1-9
 
     address - the string to check
     """

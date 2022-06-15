@@ -3,23 +3,26 @@ from pokt.rpc.models import Transaction
 from .models import *
 from .utils import get_block_txs, verify_domain, verify_address
 
-fees = {
-    "register": 1,
-    "transfer": 1  # per year
-}
+fees = {"register": 1, "transfer": 1}  # per year
 
 pokt_decimals = 6
 
+
 def register(tx: Transaction, domain_name: str, years: int):
-    """ Add domain to database
+    """Add domain to database
 
     tx -- the POKT transaction where the register occured
     domain_name - the requested name of the domain registration
     years -- requested number of years for the domain to be registered for (365 days)
     """
-    if int(tx.stdTx.msg.value.amount) != int(fees["register"]) * int(years) * int(10**pokt_decimals):
-        print("Invalid Fee", tx.stdTx.msg.value.amount, int(
-            fees["register"]) * int(years) * int(10**pokt_decimals))
+    if int(tx.stdTx.msg.value.amount) != int(fees["register"]) * int(years) * int(
+        10**pokt_decimals
+    ):
+        print(
+            "Invalid Fee",
+            tx.stdTx.msg.value.amount,
+            int(fees["register"]) * int(years) * int(10**pokt_decimals),
+        )
         return False, 1
 
     # verify valid domain
@@ -45,50 +48,59 @@ def register(tx: Transaction, domain_name: str, years: int):
 
                 i.save()
 
-                Event.create(**{
-                    "txhash": tx.hash_,
-                    "domain": i,
-                    "old_owner": "0x0",
-                    "new_owner": tx.tx_result.signer,
-                    "old_resolver": "0x0",
-                    "new_resolver": tx.tx_result.signer,
-                    "height": tx.height
-                })
+                Event.create(
+                    **{
+                        "txhash": tx.hash_,
+                        "domain": i,
+                        "old_owner": "0x0",
+                        "new_owner": tx.tx_result.signer,
+                        "old_resolver": "0x0",
+                        "new_resolver": tx.tx_result.signer,
+                        "height": tx.height,
+                    }
+                )
 
                 return True
 
-    domain = Domain.create(**{
-        "owner": tx.tx_result.signer,
-        "resolves_to": tx.tx_result.signer,
-        "name": domain_name,
-        "last_renewal": int(tx.height),
-        "ending_date": int(tx.height) + (int(years) * 96 * 365),
-        "active": True,
-        "parent": None
-    })
+    domain = Domain.create(
+        **{
+            "owner": tx.tx_result.signer,
+            "resolves_to": tx.tx_result.signer,
+            "name": domain_name,
+            "last_renewal": int(tx.height),
+            "ending_date": int(tx.height) + (int(years) * 96 * 365),
+            "active": True,
+            "parent": None,
+        }
+    )
 
-    Event.create(**{
-        "function": "register",
-        "txhash": tx.hash_,
-        "domain": domain,
-        "old_owner": "0x0",
-        "new_owner": tx.tx_result.signer,
-        "old_resolver": "0x0",
-        "new_resolver": tx.tx_result.signer,
-        "height": tx.height
-    })
+    Event.create(
+        **{
+            "function": "register",
+            "txhash": tx.hash_,
+            "domain": domain,
+            "old_owner": "0x0",
+            "new_owner": tx.tx_result.signer,
+            "old_resolver": "0x0",
+            "new_resolver": tx.tx_result.signer,
+            "height": tx.height,
+        }
+    )
 
     return True
 
+
 def register_subdomain(tx: Transaction, subdomain: str, domain_id: str):
-    """ Add domain to database with a parent domain
+    """Add domain to database with a parent domain
 
     tx -- the POKT transaction where the register occured
     subdomain - the requested name of the subdomain registration
     domain_id - the incrementing ID of the parent domain in hex form.
     """
     # verify fee is correct
-    if int(tx.stdTx.msg.value.amount) != int(fees["register"]) * int(10**pokt_decimals):
+    if int(tx.stdTx.msg.value.amount) != int(fees["register"]) * int(
+        10**pokt_decimals
+    ):
         return False, 1
 
     # verify valid domain
@@ -121,41 +133,47 @@ def register_subdomain(tx: Transaction, subdomain: str, domain_id: str):
 
                 i.save()
 
-                Event.create(**{
-                    "txhash": tx.hash_,
-                    "domain": i,
-                    "old_owner": "0x0",
-                    "new_owner": Domain[int(domain_id, 16)].owner,
-                    "old_resolver": "0x0",
-                    "new_resolver": tx.tx_result.signer,
-                    "height": tx.height
-                })
+                Event.create(
+                    **{
+                        "txhash": tx.hash_,
+                        "domain": i,
+                        "old_owner": "0x0",
+                        "new_owner": Domain[int(domain_id, 16)].owner,
+                        "old_resolver": "0x0",
+                        "new_resolver": tx.tx_result.signer,
+                        "height": tx.height,
+                    }
+                )
 
                 return True
 
-    domain = Domain.create(**{
-        "resolves_to": tx.tx_result.signer,
-        "name": subdomain,
-        "active": True,
-        "parent": Domain[int(domain_id, 16)]
-    })
+    domain = Domain.create(
+        **{
+            "resolves_to": tx.tx_result.signer,
+            "name": subdomain,
+            "active": True,
+            "parent": Domain[int(domain_id, 16)],
+        }
+    )
 
-    Event.create(**{
-        "function": "register_subdomain",
-        "txhash": tx.hash_,
-        "domain": domain,
-        "old_owner": "0x0",
-        "new_owner": Domain[int(domain_id, 16)].owner,
-        "old_resolver": "0x0",
-        "new_resolver": tx.tx_result.signer,
-        "height": tx.height
-    })
+    Event.create(
+        **{
+            "function": "register_subdomain",
+            "txhash": tx.hash_,
+            "domain": domain,
+            "old_owner": "0x0",
+            "new_owner": Domain[int(domain_id, 16)].owner,
+            "old_resolver": "0x0",
+            "new_resolver": tx.tx_result.signer,
+            "height": tx.height,
+        }
+    )
 
     return True
 
 
 def transfer_owner(tx: Transaction, domain_id: str, new_owner: str):
-    """ Change the owner of a domain to the new_owner
+    """Change the owner of a domain to the new_owner
 
     tx - the POKT transaction where the transfer occured
     domain_id - the incrementing ID of the parent domain in hex form.
@@ -189,22 +207,24 @@ def transfer_owner(tx: Transaction, domain_id: str, new_owner: str):
     domain.owner = new_owner
     domain.save()
 
-    Event.create(**{
-        "function": "transfer_owner",
-        "txhash": tx.hash_,
-        "domain": domain,
-        "old_owner": old_owner,
-        "new_owner": domain.owner.upper(),  # new_owner
-        "old_resolver": domain.resolves_to,
-        "new_resolver": domain.resolves_to,
-        "height": tx.height
-    })
+    Event.create(
+        **{
+            "function": "transfer_owner",
+            "txhash": tx.hash_,
+            "domain": domain,
+            "old_owner": old_owner,
+            "new_owner": domain.owner.upper(),  # new_owner
+            "old_resolver": domain.resolves_to,
+            "new_resolver": domain.resolves_to,
+            "height": tx.height,
+        }
+    )
 
     return True
 
 
 def transfer_resolver(tx: Transaction, domain_id: str, new_resolver: str):
-    """ Change the resolves_to of a domain to the new_resolver
+    """Change the resolves_to of a domain to the new_resolver
 
     tx - the POKT transaction where the transfer occured
     domain_id - the incrementing ID of the parent domain in hex form.
@@ -238,22 +258,24 @@ def transfer_resolver(tx: Transaction, domain_id: str, new_resolver: str):
     domain.resolves_to = new_resolver
     domain.save()
 
-    Event.create(**{
-        "function": "transfer_resolver",
-        "txhash": tx.hash_,
-        "domain": domain,
-        "old_owner": owner,
-        "new_owner": owner,  # new_owner
-        "old_resolver": old_resolver,
-        "new_resolver": domain.resolves_to.upper(),
-        "height": tx.height
-    })
+    Event.create(
+        **{
+            "function": "transfer_resolver",
+            "txhash": tx.hash_,
+            "domain": domain,
+            "old_owner": owner,
+            "new_owner": owner,  # new_owner
+            "old_resolver": old_resolver,
+            "new_resolver": domain.resolves_to.upper(),
+            "height": tx.height,
+        }
+    )
 
     return True
 
 
 def burn(tx: Transaction, domain_id: str):
-    """ Remove all attributes and deactivate a Domain
+    """Remove all attributes and deactivate a Domain
 
     tx - the POKT transaction where the burn occured
     domain_id - the incrementing ID of the domain in hex form.
@@ -284,15 +306,17 @@ def burn(tx: Transaction, domain_id: str):
     domain.active = False
     domain.save()
 
-    Event.create(**{
-        "function": "burn",
-        "txhash": tx.hash_,
-        "domain": domain,
-        "old_owner": owner,
-        "new_owner": "0x0",  # new_owner
-        "old_resolver": domain.resolves_to,
-        "new_resolver": "0x0",
-        "height": tx.height
-    })
+    Event.create(
+        **{
+            "function": "burn",
+            "txhash": tx.hash_,
+            "domain": domain,
+            "old_owner": owner,
+            "new_owner": "0x0",  # new_owner
+            "old_resolver": domain.resolves_to,
+            "new_resolver": "0x0",
+            "height": tx.height,
+        }
+    )
 
     return True

@@ -4,6 +4,7 @@ import time
 
 db = SqliteDatabase(os.path.join(os.environ["pns_data_dir"], "db"))
 
+
 class Domain(Model):
     owner = CharField(max_length=40, null=True)
     resolves_to = CharField(max_length=40)
@@ -12,7 +13,7 @@ class Domain(Model):
     last_renewal = IntegerField(null=True)
     ending_date = IntegerField(null=True)
     active = BooleanField()
-    parent = ForeignKeyField('self', null=True)
+    parent = ForeignKeyField("self", null=True)
 
     class Meta:
         database = db
@@ -41,6 +42,7 @@ class State(Model):
     class Meta:
         database = db
         db_table = "state"
+
 
 def create_database(start_block: int):
     db.create_tables([Domain, Event, State])
