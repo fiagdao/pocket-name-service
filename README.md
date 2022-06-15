@@ -13,3 +13,6 @@ To run:
 
 `cd pocket-name-service`
 `pns --data-dir ./`
+
+
+To interact with the RPC, go to `localhost:5000/docs`
