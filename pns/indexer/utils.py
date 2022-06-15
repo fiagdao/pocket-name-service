@@ -1,4 +1,5 @@
 from pokt import PoktRPCDataProvider
+from pokt.rpc.utils import PoktRPCError, PortalRPCError
 import re
 
 def get_block_txs(height: int, pokt_rpc: PoktRPCDataProvider, retries: int = 20, per_page: int = 1000):

@@ -1,0 +1,22 @@
+openapi: 3.0.3
+info:
+  title: Pocket-Naming-Service
+  description: This is the API definition for PNS core RPC calls. PNS is a social consensus naming service built on-top of Pocket
+  contact:
+    pierre@thunderstake.io
+  license:
+    name: MIT license
+paths:
+  /:
+    get:
+      summary: Get the RPC spec of the PNS API
+  /query/state:
+    post:
+      tags:
+        - query
+      requestBody:
+        description: Returns the syncing status of the PNS client
+        content:
+          application/json:
+            schema: { }
+          required: false

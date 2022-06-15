@@ -1,8 +1,7 @@
 # to install pypocket follow instructions here: https://github.com/pokt-foundation/pypocket (it will be on PyPi soon)
 from pokt.rpc.models import Transaction
-from models import *
-from utils import get_block_txs, verify_domain, verify_address
-from models import *
+from .models import *
+from .utils import get_block_txs, verify_domain, verify_address
 
 fees = {
     "register": 1,

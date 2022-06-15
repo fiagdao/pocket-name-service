@@ -2,56 +2,48 @@
 import sys
 from pokt import PoktRPCDataProvider
 from pokt.rpc.models import Transaction
-from models import *
+from argparse import ArgumentParser
 import threading
-from utils import get_block_txs, verify_domain, verify_address
-from models import *
-import signal
+from .models import *
 import json
-import logging
+import os
+from ..logger import logger
 
-from functions import *
+from .models import *
+from ..config import Config
+from .utils import get_block_txs, verify_domain, verify_address
+from .functions import *
 
-logging.basicConfig(format='%(filename)s: %(message)s',
-                    handlers=[
-                        logging.FileHandler("test.log"),
-                        logging.StreamHandler()
-                    ],
-                    level=logging.DEBUG)
-
-# setup and constants
-rpc_url = "https://mainnet-1.nodes.pokt.network:4201"
-pokt_rpc = PoktRPCDataProvider(rpc_url)
-
-pns_address = "09e76ee6c3c84e203488f3dc171da6bc812ddb9c"
-fees = {
-    "register": 1,
-    "transfer": 1  # per year
-}
 
 pokt_decimals = 6
 
-quit_event = threading.Event()
-signal.signal(signal.SIGINT, lambda *_args: quit_event.set())
-
-
-def main():
+def start_pns(config: Config):
     """
     Continously loops through new blocks and checks if there are any valid transactions and will call their associated functions
     """
 
+    logger.info("Starting indexer")
+
+    pns_address = config.pns_config.pns_address
+    rpc_url = config.pns_config.rpc_url
+    pokt_rpc = PoktRPCDataProvider(rpc_url)
+
+    create_database(config.pns_config.start_block)
+
     while True:
-        current_height = State[1].height
+
+        state = State[1]
+
+        current_height = state.height
         target_height = pokt_rpc.get_height()
+
+        state.target_height = target_height
+        state.save()
 
         for block in range(current_height + 1, target_height + 1):
             with db.atomic() as transaction:
                 try:
-                    print("Starting block", block)
-                    # avoid abrupt interrupts that could mess up the state
-                    if quit_event.is_set():
-                        print("safely quitting")
-                        quit()
+                    logger.info("Starting block {}".format(block))
 
                     # deactivate expired domains
                     expired_domains = Domain.select().where(Domain.ending_date <= block)
@@ -105,46 +97,45 @@ def main():
                         # register
                         if memo[:1] == "r":
                             params = memo[1:].split(",")
-                            print("registering domain", params[0])
+                            logger.info("registering domain {}".format(params[0]))
                             register_ = register(tx=tx, domain_name=params[0], years=params[1])
                             if register != True:
                                 # TODO: send back tokens to user if it fails
-                                print("Invalid domain register")
+                                logger.info("Invalid domain register")
 
                         elif memo[:1] == "s":
                             params = memo[1:].split(",")
-                            print("registering subdomain", params[0])
+                            logger.info("registering subdomain {}".format(params[0]))
                             register_subdomain_ = register_subdomain(tx=tx, subdomain=params[0], domain_id=params[1])
                             if register_subdomain != True:
                                 # TODO: send back tokens to user if it fails
-                                print("Invalid subdomain register")
+                                logger.info("Invalid subdomain register")
 
                         elif memo[:1] == "o":
                             params = memo[1:].split(",")
-                            print("transfering ownership of ", params[0])
+                            logger.info("transfering ownership of  {}".format(params[0]))
                             transfer_owner_ = transfer_owner(tx=tx, domain_id=params[0], new_owner=params[1])
                             if transfer_owner != True:
-                                print("Invalid owner transfership")
+                                logger.info("Invalid owner transfership")
 
                         elif memo[:1] == "v":
                             params = memo[1:].split(",")
-                            print("transfering resolver of ", params[0])
+                            logger.info("transfering resolver of  {}".format(params[0]))
                             transfer_resolver_ = transfer_resolver(tx=tx, domain_id=params[0], new_resolver=params[1])
                             if transfer_resolver != True:
-                                print("Invalid resolver transfership")
+                                logger.info("Invalid resolver transfership")
 
                         elif memo[:1] == "b":
                             params = memo[1:].split(",")
-                            print("burning ", params[0])
+                            logger.info("burning  {}".format(params[0]))
                             burn_ = burn(tx=tx, domain_id=params[0])
                             if burn != True:
-                                print("Invalid burn")
+                                logger.info("Invalid burn")
 
-                    state = State[1]
                     state.height += 1
                     state.save()
                 except Exception as e:
-                    print(e)
+                    logger.info(e)
                     transaction.rollback()
                     quit()
 
