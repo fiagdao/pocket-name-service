@@ -14,7 +14,7 @@ setup(
     author="Pierre",
     author_email="pierre@thunderstake.io",
     license="MIT",
-    packages=["pns"],
+    packages=["pns", "pns.indexer", "pns.rpc"],
     entry_points={
         "console_scripts": ["pns=pns.main:main"],
     },
