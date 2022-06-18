@@ -22,7 +22,7 @@ setup(
         "pydantic",
         "peewee",
         "fastapi",
-        "jsonrpc-fastapi",
+        "fastapi-jsonrpc",
         "uvicorn"
     ]
 )
