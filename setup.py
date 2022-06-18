@@ -18,4 +18,11 @@ setup(
     entry_points={
         "console_scripts": ["pns=pns.main:main"],
     },
+    install_requires=[
+        "pydantic",
+        "peewee",
+        "fastapi",
+        "jsonrpc-fastapi",
+        "uvicorn"
+    ]
 )
