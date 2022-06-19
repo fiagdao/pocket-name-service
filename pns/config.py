@@ -14,8 +14,7 @@ class Pns_config(BaseModel):
 
 
 class Rpc_config(BaseModel):
-    listen_url: str
-
+    port: int
 
 class Config(BaseModel):
     pns_config: Pns_config

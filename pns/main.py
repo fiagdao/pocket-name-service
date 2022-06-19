@@ -13,7 +13,7 @@ import sys
 
 
 def main():
-    data_default = "~/.pns"
+    data_default = "/root/.pns"
     parser = ArgumentParser("pns", description="Start pocket-name-service")
 
     parser.add_argument("-d", "--data-dir", type=str, default=data_default)
@@ -27,13 +27,14 @@ def main():
         quit()
     dict = json.loads(file)
 
+    print(dict)
+    
     config = Config(**dict)
 
     logger.info(
         "Starting PNS in directory {}".format(os.path.join(args.data_dir, "data"))
     )
-    # logger.info("Log file initialized at {}".format(os.path.join(args,data)))
-    # why not?
+    
     with open("pns/pns.txt") as myfile:
         logger.info(myfile.read())
     os.environ["pns_data_dir"] = os.path.join(args.data_dir, "data")
@@ -42,7 +43,7 @@ def main():
     from .rpc import boot
 
     t1 = Process(target=start_pns, args=(config,))
-    t2 = Process(target=boot)
+    t2 = Process(target=boot, args=(config,))
 
     t1.daemon = True
     t2.daemon = True
@@ -59,6 +60,3 @@ def main():
         t2.terminate()
         t1.join()
         t2.join()
-
-    # t1.join()
-    # t2.join()

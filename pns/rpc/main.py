@@ -10,8 +10,6 @@ import uvicorn
 import time
 import json
 
-# import peewee
-
 app = jsonrpc.API()
 
 api_v1 = jsonrpc.Entrypoint("/api/v1/jsonrpc")
@@ -111,8 +109,8 @@ class Server(uvicorn.Server):
             thread.join()
 
 
-def boot():
-    server = Server(uvicorn.Config(app, port=5000, debug=True, access_log=False))
+def boot(config):
+    server = Server(uvicorn.Config(app, port=config.rpc_config.port, debug=True, access_log=False))
     server.run()
     while server.run_in_thread():
         time.sleep(2)
