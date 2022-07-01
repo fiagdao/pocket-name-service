@@ -1,1 +1,6 @@
-/data
+pns.egg-info
+data
+pypocket
+pns/__pycache__
+pns/rpc/__pycache__
+pns/indexer/__pycache__
