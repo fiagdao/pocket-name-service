@@ -6,6 +6,7 @@ import json
 import os
 import time
 import sys
+from os.path import expanduser
 
 #
 # quit_event = threading.Event()
@@ -13,7 +14,7 @@ import sys
 
 
 def main():
-    data_default = "/root/.pns"
+    data_default = os.path.join(expanduser("~"), ".pns/")
     parser = ArgumentParser("pns", description="Start pocket-name-service")
 
     parser.add_argument("-d", "--data-dir", type=str, default=data_default)
@@ -27,15 +28,13 @@ def main():
         quit()
     dict = json.loads(file)
 
-    print(dict)
-    
     config = Config(**dict)
 
     logger.info(
         "Starting PNS in directory {}".format(os.path.join(args.data_dir, "data"))
     )
     
-    with open("pns/pns.txt") as myfile:
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "pns.txt")) as myfile:
         logger.info(myfile.read())
     os.environ["pns_data_dir"] = os.path.join(args.data_dir, "data")
 
