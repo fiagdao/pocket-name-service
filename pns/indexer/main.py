@@ -101,7 +101,7 @@ def start_pns(config: Config):
                             params = memo[1:].split(",")
                             logger.info("registering domain {}".format(params[0]))
                             register_ = register(
-                                tx=tx, domain_name=params[0], years=params[1]
+                                config=config, tx=tx, domain_name=params[0], years=params[1]
                             )
                             if register != True:
                                 # TODO: send back tokens to user if it fails
@@ -111,7 +111,7 @@ def start_pns(config: Config):
                             params = memo[1:].split(",")
                             logger.info("registering subdomain {}".format(params[0]))
                             register_subdomain_ = register_subdomain(
-                                tx=tx, subdomain=params[0], domain_id=params[1]
+                                config=config, tx=tx, subdomain=params[0], domain_id=params[1]
                             )
                             if register_subdomain != True:
                                 # TODO: send back tokens to user if it fails
@@ -123,7 +123,7 @@ def start_pns(config: Config):
                                 "transfering ownership of  {}".format(params[0])
                             )
                             transfer_owner_ = transfer_owner(
-                                tx=tx, domain_id=params[0], new_owner=params[1]
+                                config=config, tx=tx, domain_id=params[0], new_owner=params[1]
                             )
                             if transfer_owner != True:
                                 logger.info("Invalid owner transfership")
@@ -132,7 +132,7 @@ def start_pns(config: Config):
                             params = memo[1:].split(",")
                             logger.info("transfering resolver of  {}".format(params[0]))
                             transfer_resolver_ = transfer_resolver(
-                                tx=tx, domain_id=params[0], new_resolver=params[1]
+                                config=config, tx=tx, domain_id=params[0], new_resolver=params[1]
                             )
                             if transfer_resolver != True:
                                 logger.info("Invalid resolver transfership")
@@ -140,7 +140,7 @@ def start_pns(config: Config):
                         elif memo[:1] == "b":
                             params = memo[1:].split(",")
                             logger.info("burning  {}".format(params[0]))
-                            burn_ = burn(tx=tx, domain_id=params[0])
+                            burn_ = burn(config=config, tx=tx, domain_id=params[0])
                             if burn != True:
                                 logger.info("Invalid burn")
 

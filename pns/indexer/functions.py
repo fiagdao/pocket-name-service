@@ -2,26 +2,25 @@
 from pokt.rpc.models import Transaction
 from .models import *
 from .utils import get_block_txs, verify_domain, verify_address
-
-fees = {"register": 1, "transfer": 1}  # per year
+from ..config import Config
 
 pokt_decimals = 6
 
 
-def register(tx: Transaction, domain_name: str, years: int):
+def register(config: Config, tx: Transaction, domain_name: str, years: int):
     """Add domain to database
 
     tx -- the POKT transaction where the register occured
     domain_name - the requested name of the domain registration
     years -- requested number of years for the domain to be registered for (365 days)
     """
-    if int(tx.stdTx.msg.value.amount) != int(fees["register"]) * int(years) * int(
+    if int(tx.stdTx.msg.value.amount) != int(config.pns_config.fees["register"]) * int(years) * int(
         10**pokt_decimals
     ):
         print(
             "Invalid Fee",
             tx.stdTx.msg.value.amount,
-            int(fees["register"]) * int(years) * int(10**pokt_decimals),
+            int(config.pns_config.fees["register"]) * int(years) * int(10**pokt_decimals),
         )
         return False, 1
 
@@ -90,7 +89,7 @@ def register(tx: Transaction, domain_name: str, years: int):
     return True
 
 
-def register_subdomain(tx: Transaction, subdomain: str, domain_id: str):
+def register_subdomain(config: Config, tx: Transaction, subdomain: str, domain_id: str):
     """Add domain to database with a parent domain
 
     tx -- the POKT transaction where the register occured
@@ -98,7 +97,7 @@ def register_subdomain(tx: Transaction, subdomain: str, domain_id: str):
     domain_id - the incrementing ID of the parent domain in hex form.
     """
     # verify fee is correct
-    if int(tx.stdTx.msg.value.amount) != int(fees["register"]) * int(
+    if int(tx.stdTx.msg.value.amount) != int(config.pns_config.fees["register"]) * int(
         10**pokt_decimals
     ):
         return False, 1
@@ -172,7 +171,7 @@ def register_subdomain(tx: Transaction, subdomain: str, domain_id: str):
     return True
 
 
-def transfer_owner(tx: Transaction, domain_id: str, new_owner: str):
+def transfer_owner(config: Config, tx: Transaction, domain_id: str, new_owner: str):
     """Change the owner of a domain to the new_owner
 
     tx - the POKT transaction where the transfer occured
@@ -180,7 +179,7 @@ def transfer_owner(tx: Transaction, domain_id: str, new_owner: str):
     new_owner - the POKT address of the new owner of the Domain
     """
 
-    if tx.stdTx.msg.value.amount != fees["transfer"] * (10**pokt_decimals):
+    if tx.stdTx.msg.value.amount != config.pns_config.fees["transfer"] * (10**pokt_decimals):
         return False, 1
 
     # check if root domain exists
@@ -223,14 +222,14 @@ def transfer_owner(tx: Transaction, domain_id: str, new_owner: str):
     return True
 
 
-def transfer_resolver(tx: Transaction, domain_id: str, new_resolver: str):
+def transfer_resolver(config: Config, tx: Transaction, domain_id: str, new_resolver: str):
     """Change the resolves_to of a domain to the new_resolver
 
     tx - the POKT transaction where the transfer occured
     domain_id - the incrementing ID of the parent domain in hex form.
     new_resolver - the POKT address of the new resolver of the Domain
     """
-    if tx.stdTx.msg.value.amount != fees["transfer"] * (10**pokt_decimals):
+    if tx.stdTx.msg.value.amount != config.pns_config.fees["transfer"] * (10**pokt_decimals):
         return False, 1
 
     # check if root domain exists
@@ -274,7 +273,7 @@ def transfer_resolver(tx: Transaction, domain_id: str, new_resolver: str):
     return True
 
 
-def burn(tx: Transaction, domain_id: str):
+def burn(config: Config, tx: Transaction, domain_id: str):
     """Remove all attributes and deactivate a Domain
 
     tx - the POKT transaction where the burn occured

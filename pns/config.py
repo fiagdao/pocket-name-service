@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 
 class Fees(BaseModel):
@@ -12,11 +13,9 @@ class Pns_config(BaseModel):
     start_block: int
     fees: Fees
 
-
 class Rpc_config(BaseModel):
     port: int
 
 class Config(BaseModel):
     pns_config: Pns_config
-
     rpc_config: Rpc_config

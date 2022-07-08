@@ -9,7 +9,7 @@ with open(_readme_path, "r") as rm:
 
 setup(
     name="pns",
-    version="0.01",
+    version="0.02",
     description="Python Client for PNS for Pocket Network.",
     author="Pierre",
     author_email="pierre@thunderstake.io",

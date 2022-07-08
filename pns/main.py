@@ -34,7 +34,7 @@ def main():
         "Starting PNS in directory {}".format(os.path.join(args.data_dir, "data"))
     )
     
-    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "pns.txt")) as myfile:
+    with open(os.path.join(os.path.dirname(os.path.realpath(__file__)), "pns_text.py")) as myfile:
         logger.info(myfile.read())
     os.environ["pns_data_dir"] = os.path.join(args.data_dir, "data")
 
