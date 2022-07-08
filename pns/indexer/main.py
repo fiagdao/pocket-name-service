@@ -29,7 +29,7 @@ def start_pns(config: Config):
     create_database(config.pns_config.start_block)
 
     while True:
-
+        time.sleep(3)
         state = State[1]
 
         current_height = state.height
@@ -81,8 +81,9 @@ def start_pns(config: Config):
 
                     txs = get_block_txs(height=block, pokt_rpc=pokt_rpc)
 
+                    logger.info("Length of block txs is {}".format(len(txs)))
                     for tx in txs:
-
+                        logger.info("found tx")
                         # transaction failed
                         if tx.tx_result.code != 0:
                             continue
@@ -103,9 +104,9 @@ def start_pns(config: Config):
                             register_ = register(
                                 config=config, tx=tx, domain_name=params[0], years=params[1]
                             )
-                            if register != True:
+                            if register_ != True:
                                 # TODO: send back tokens to user if it fails
-                                logger.info("Invalid domain register")
+                                logger.info("Invalid domain register. Code {}".format(register_[1]))
 
                         elif memo[:1] == "s":
                             params = memo[1:].split(",")
@@ -113,9 +114,9 @@ def start_pns(config: Config):
                             register_subdomain_ = register_subdomain(
                                 config=config, tx=tx, subdomain=params[0], domain_id=params[1]
                             )
-                            if register_subdomain != True:
+                            if register_subdomain_ != True:
                                 # TODO: send back tokens to user if it fails
-                                logger.info("Invalid subdomain register")
+                                logger.info("Invalid subdomain register. Code {}".format(register_subdomain_[1]))
 
                         elif memo[:1] == "o":
                             params = memo[1:].split(",")
@@ -125,8 +126,8 @@ def start_pns(config: Config):
                             transfer_owner_ = transfer_owner(
                                 config=config, tx=tx, domain_id=params[0], new_owner=params[1]
                             )
-                            if transfer_owner != True:
-                                logger.info("Invalid owner transfership")
+                            if transfer_owner_ != True:
+                                logger.info("Invalid owner transfership. Code {}".format(transfer_owner_[0]))
 
                         elif memo[:1] == "v":
                             params = memo[1:].split(",")
@@ -134,15 +135,15 @@ def start_pns(config: Config):
                             transfer_resolver_ = transfer_resolver(
                                 config=config, tx=tx, domain_id=params[0], new_resolver=params[1]
                             )
-                            if transfer_resolver != True:
-                                logger.info("Invalid resolver transfership")
+                            if transfer_resolver_ != True:
+                                logger.info("Invalid resolver transfership. Code {}".format(transfer_resolver_[0]))
 
                         elif memo[:1] == "b":
                             params = memo[1:].split(",")
                             logger.info("burning  {}".format(params[0]))
                             burn_ = burn(config=config, tx=tx, domain_id=params[0])
-                            if burn != True:
-                                logger.info("Invalid burn")
+                            if burn_ != True:
+                                logger.info("Invalid burn. Code {}".format(burn_[0]))
 
                     state.height += 1
                     state.save()

@@ -14,13 +14,13 @@ def register(config: Config, tx: Transaction, domain_name: str, years: int):
     domain_name - the requested name of the domain registration
     years -- requested number of years for the domain to be registered for (365 days)
     """
-    if int(tx.stdTx.msg.value.amount) != int(config.pns_config.fees["register"]) * int(years) * int(
+    if int(tx.stdTx.msg.value.amount) != int(config.pns_config.fees.register_fee) * int(years) * int(
         10**pokt_decimals
     ):
         print(
             "Invalid Fee",
             tx.stdTx.msg.value.amount,
-            int(config.pns_config.fees["register"]) * int(years) * int(10**pokt_decimals),
+            int(config.pns_config.fees.register_fee) * int(years) * int(10**pokt_decimals),
         )
         return False, 1
 
@@ -97,7 +97,7 @@ def register_subdomain(config: Config, tx: Transaction, subdomain: str, domain_i
     domain_id - the incrementing ID of the parent domain in hex form.
     """
     # verify fee is correct
-    if int(tx.stdTx.msg.value.amount) != int(config.pns_config.fees["register"]) * int(
+    if int(tx.stdTx.msg.value.amount) != int(config.pns_config.fees.register_fee) * int(
         10**pokt_decimals
     ):
         return False, 1
@@ -179,7 +179,7 @@ def transfer_owner(config: Config, tx: Transaction, domain_id: str, new_owner: s
     new_owner - the POKT address of the new owner of the Domain
     """
 
-    if tx.stdTx.msg.value.amount != config.pns_config.fees["transfer"] * (10**pokt_decimals):
+    if tx.stdTx.msg.value.amount != config.pns_config.fees.transfer_fee * (10**pokt_decimals):
         return False, 1
 
     # check if root domain exists
@@ -229,7 +229,7 @@ def transfer_resolver(config: Config, tx: Transaction, domain_id: str, new_resol
     domain_id - the incrementing ID of the parent domain in hex form.
     new_resolver - the POKT address of the new resolver of the Domain
     """
-    if tx.stdTx.msg.value.amount != config.pns_config.fees["transfer"] * (10**pokt_decimals):
+    if tx.stdTx.msg.value.amount != config.pns_config.fees.transfer_fee * (10**pokt_decimals):
         return False, 1
 
     # check if root domain exists
